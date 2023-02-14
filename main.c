@@ -1,6 +1,7 @@
 #include "ft_printf.h"
 
-int main() {  
+int main()
+{
 
     ft_printf("%s\n", "DECIMAL NUMBER");
     ft_printf("ft_printf: %d\n", 42);
@@ -23,7 +24,7 @@ int main() {
     int a = ft_printf("ft_printf: %i\n", INT_MIN);
     int b = printf("printf   : %i\n", INT_MIN);
     printf("check count (i int_min): %d (custom) and %d (original)\n\n", a, b);
-    
+
     ft_printf("%s\n", "UNSIGNED DECIMAL NUMBER");
     ft_printf("ft_printf: %u\n", 42);
     printf("printf   : %u\n", 42);
@@ -48,7 +49,6 @@ int main() {
     int l = ft_printf("ft_printf: %X\n", 42);
     int m = printf("printf   : %X\n", 42);
     printf("check count (hex upper): %d (custom) and %d (original)\n\n", l, m);
-
 
     ft_printf("%s\n", "HEXADECIMAL NUMBER LOWERCASE");
     ft_printf("ft_printf: %x\n", 42);
@@ -78,5 +78,4 @@ int main() {
     printf("check count (mixed): %d (custom) and %d (original)\n", w, v);
 
     return 0;
-
 }
