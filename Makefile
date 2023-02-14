@@ -2,7 +2,7 @@ CC = cc
 
 CFLAGS = -Wextra -Wall -Werror
 
-NAME = ft_printf
+NAME = printf
 
 HEADER = ft_printf.h
 

@@ -1,19 +1,45 @@
 #include "ft_printf.h"
 
-void ft_putchar(char c) {
-	write(1, &c, 1);
+void ft_print_char(char c, int *count) {
+
+    write(1, &c, 1);
+    *count += 1;
 }
 
-void ft_print_nbr(long nbr, int *count) {
+void ft_print_nbr(long nbr, int *count, char qualifier) {
+
+    if (qualifier == 'd') {
+
+        if (nbr == -2147483648) {
+            write(1, "-2", 2);
+            *count += 2;
+            nbr = 147483648;
+        }
+
+        if (nbr < 0) {
+            nbr *= -1;
+            ft_print_char('-', count);
+        }
+    }
 
     if (nbr >= 10) {
-        ft_print_nbr(nbr / 10, count);
-        ft_print_nbr(nbr % 10, count);
+        ft_print_nbr(nbr / 10, count, qualifier);
+        ft_print_nbr(nbr % 10, count, qualifier);
     }
-    else {
-        ft_putchar(nbr + 48);
-        *count += 1;
+    else
+        ft_print_char(nbr + 48, count);
+
+}
+
+void ft_print_str(char *str, int *count) {
+
+    if (!str) {
+        ft_print_str("(null)", count);
+        return ;
     }
+
+    for (int ch = 0; str[ch]; ch++)
+        ft_print_char(str[ch], count);
 
 }
 
@@ -39,10 +65,26 @@ void ft_to_hex(char qualifier, unsigned long format, int *count) {
 		quotient /= 16;
     }
     
-    for (j = i - 1; j > 0; j--) {
-        write(1, &hexadecimalNumber[j], 1);
-        *count += 1;
-    }  
+    for (j = i - 1; j > 0; j--) 
+        ft_print_char(hexadecimalNumber[j], count);
+}
+
+void ft_print_ptr(void *p, int *count) {
+
+    if (p == NULL)
+        ft_print_str("(nil)", count);
+    else {
+        ft_print_str("0x", count);
+        char qualifier = 'p';
+        ft_to_hex(qualifier, (uintptr_t)p, count);
+    }
+}
+
+void ft_print_hex(unsigned int hex, int *count, const char *format) {
+
+    char qualifier = (*format == 'x') ? 'x' : 'X';
+                    
+    ft_to_hex(qualifier, hex, count);
 
 }
 
@@ -57,107 +99,46 @@ int ft_printf(const char *format, ...) {
     
     for (int i = 0; format[i]; i++) {
 
-        if (format[i] && format[i] != '%') {
-            write(1, &format[i], 1);
-            count++;
-        }
+        if (format[i] && format[i] != '%')
+            ft_print_char(format[i], &count);
 
         else if (format[i] == '%') {
 
             i++;
 
-            if (format[i] == '%') {
-                write(1, "%", 1);
-                count++;
-            }
+            if (format[i] == '%')
+                ft_print_char('%', &count);
 
             else if (format[i] == 'd' || format[i] == 'i') {
-                
-                int nbr = va_arg(arg_ptr, int);
-
-                if (nbr == -2147483648) {
-                    write(1, "-2", 2);
-                    nbr = 147483648;
-                    count += 2;
-                }
-
-                if (nbr < 0) {
-                    nbr *= -1;
-                    write(1, "-", 1);
-                    count++;
-                }
-                
-                ft_print_nbr(nbr, &count);
+                char qualifier = 'd';
+                ft_print_nbr(va_arg(arg_ptr, int), &count, qualifier);
             }
 
             else if (format[i] == 'u') {     
-                unsigned int uint = (unsigned int)va_arg(arg_ptr, unsigned int);
-                ft_print_nbr(uint, &count);
+                char qualifier = 'u';
+                ft_print_nbr((unsigned int)va_arg(arg_ptr, unsigned int), &count, qualifier);
             }
 
-            else if (format[i] == 's') {
+            else if (format[i] == 's')
+                ft_print_str((char *)va_arg(arg_ptr, char *), &count);
 
-                char *str = (char *)va_arg(arg_ptr, char *);
+            else if (format[i] == 'c')
+                ft_print_char((char)va_arg(arg_ptr, int), &count);
 
-                if (!str) {
-                    write(1, "(null)\n", 7);
-                    count += 7;
-                    break ;
-                }
+            else if (format[i] == 'p')
+                ft_print_ptr(va_arg(arg_ptr, void *), &count);
 
-                int ch = 0;
-                while (str[ch]) {
-                    write(1, &str[ch] , 1);
-                    ch++;
-                    count++;
-                }
-            }
-
-            else if (format[i] == 'c') {
-                char c = (char)va_arg(arg_ptr, int);
-                write(1, &c, 1);
-                count++;
-            }
-
-            else if (format[i] == 'p') {
-
-                void *p = va_arg(arg_ptr, void *);
-
-                if (p == NULL) {
-                    write(1, "(nil)", 5);
-                    count += 5;
-                }
-                else {
-                    write(1, "0x", 2);
-                    count += 2;
-                    char qualifier = 'p';
-                    ft_to_hex(qualifier, (uintptr_t)p, &count);
-                }
-            }
-
-            else if (format[i] == 'x' || format[i] == 'X') {
-
-                unsigned long x = (unsigned long)va_arg(arg_ptr, unsigned int);
-                char qualifier;
-
-                if (format[i] == 'x')
-                    qualifier = 'x';
-                else
-                    qualifier = 'X';
-                ft_to_hex(qualifier, x, &count);
-            }
+            else if (format[i] == 'x' || format[i] == 'X')
+                ft_print_hex((unsigned long)va_arg(arg_ptr, unsigned int), &count, &format[i]);
 
             else {
-                write(1, "%", 1);
-                count++;
+                ft_print_char('%', &count);
                 i++;
             }
-
         }
     }
 
     va_end(arg_ptr);
-
     return count;
 
 }
