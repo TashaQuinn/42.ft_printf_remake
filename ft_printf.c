@@ -26,6 +26,7 @@ void ft_to_hex(char qualifier, unsigned long format, int *count) {
     quotient = format;
         
     while (quotient != 0) {
+
         remainder = quotient % 16;
         if (remainder < 10)
             remainder += 48;
@@ -73,31 +74,37 @@ int ft_printf(const char *format, ...) {
             else if (format[i] == 'd' || format[i] == 'i') {
                 
                 int nbr = va_arg(arg_ptr, int);
+
                 if (nbr == -2147483648) {
                     write(1, "-2", 2);
                     nbr = 147483648;
                     count += 2;
                 }
+
                 if (nbr < 0) {
                     nbr *= -1;
                     write(1, "-", 1);
                     count++;
                 }
+                
                 ft_print_nbr(nbr, &count);
             }
 
-            else if (format[i] == 'u') {
+            else if (format[i] == 'u') {     
                 unsigned int uint = (unsigned int)va_arg(arg_ptr, unsigned int);
                 ft_print_nbr(uint, &count);
             }
 
             else if (format[i] == 's') {
+
                 char *str = (char *)va_arg(arg_ptr, char *);
+
                 if (!str) {
                     write(1, "(null)\n", 7);
                     count += 7;
                     break ;
                 }
+
                 int ch = 0;
                 while (str[ch]) {
                     write(1, &str[ch] , 1);
@@ -132,6 +139,7 @@ int ft_printf(const char *format, ...) {
 
                 unsigned long x = (unsigned long)va_arg(arg_ptr, unsigned int);
                 char qualifier;
+
                 if (format[i] == 'x')
                     qualifier = 'x';
                 else
